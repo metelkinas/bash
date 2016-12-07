@@ -41,8 +41,8 @@ if [ $res -ne 0 ]
       echo "Ошибка. Неподдерживаемый тип ОС."
       exit 1	
 fi
-#echo $OSName
+echo $OSName
 GetOSVersion
-#echo $OSVersion
+echo $OSVersion
 
 
