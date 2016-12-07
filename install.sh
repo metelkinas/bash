@@ -20,14 +20,21 @@ return 1
 }
 
 GetOSVersion () {
-if [ "$OSName" = "CentOS" ]
+#if [ "$OSName" = "CentOS" ]
+#   then
+#      OSVersion=$((cat /etc/*-release | grep VERSION_ID) | sed -e 's/.*"\(.*\)".*/\1/')
+#      return 0
+#   else
+#      OSVersion=$(lsb_release -rs)
+#      return 0
+#fi
+OSVersion=$(lsb_release -rs)
+if [ $? -ne 0 ]
    then
       OSVersion=$((cat /etc/*-release | grep VERSION_ID) | sed -e 's/.*"\(.*\)".*/\1/')
       return 0
-   else
-      OSVersion=$(lsb_release -rs)
-      return 0
-fi
+fi	
+return 0
 }
 
 GetOSName
