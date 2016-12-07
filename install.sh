@@ -33,7 +33,16 @@ temp=$(cat /etc/*-release | grep -m 1 release)
 OSVersion=${temp//[^0-9.]}
 }
 
+
 GetOSName
-echo $OSName
+res=$?
+if [ $res -ne 0 ]
+   then
+      echo "Ошибка. Неподдерживаемый тип ОС."
+      exit 1	
+fi
+#echo $OSName
 GetOSVersion
-echo $OSVersion
+#echo $OSVersion
+
+
