@@ -29,7 +29,8 @@ if [ "$OSName" = "RHEL" ]
       OSVersion=$(cat /etc/*-release | grep -m 1 release | awk '{ print $7 }')
       return 0
 fi
-#cat /etc/*-release | grep -m 1 release
+temp=$(cat /etc/*-release | grep -m 1 release)
+OSVersion=${temp//[^0-9.]}
 }
 
 GetOSName
