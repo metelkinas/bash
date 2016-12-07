@@ -29,6 +29,7 @@ GetOSVersion () {
 #      return 0
 #fi
 OSVersion=$(lsb_release -rs)
+echo $?
 if [ $? -ne 0 ]
    then
       OSVersion=$((cat /etc/*-release | grep VERSION_ID) | sed -e 's/.*"\(.*\)".*/\1/')
