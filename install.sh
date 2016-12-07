@@ -20,10 +20,6 @@ return 1
 }
 
 GetOSVersion () {
-if [ "$OSName" != "Red Hat Enterprise" ]
-   then
-      temp=$(cat /etc/*-release | grep VERSION_ID)
-      echo $temp	
 if [ "$OSName" = "CentOS" ]
    then
       OSVersion=$((cat /etc/*-release | grep VERSION_ID) | sed -e 's/.*"\(.*\)".*/\1/')
