@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 GetOSName () {
 if [ -n "$(cat /etc/*-release | grep Ubuntu)" ]
    then
