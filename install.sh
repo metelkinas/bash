@@ -47,19 +47,15 @@ JavaVer=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
 }
 
 CheckInstallTomcat () {
-#temp=$(ps -ef | grep -m 1 tomcat | awk '{print $1}')
-#echo $temp
-#echo $USER
-if [[ "$(ps -ef | grep -m 1 tomcat | awk '{print $1}')" != "$USER" ]]
-   then 
-      return 0
-fi
+TomcatProc=false
+TomcatPak=false
 if [ "$OSName" = "Ubuntu" ]
    then
       if [ -z "$(dpkg -l | grep tomcat)" ]
          then
             return 1 
          else
+            TomcatPak=true
             return 0   
       fi
 fi
@@ -67,13 +63,38 @@ if [ -z "$(yum list installed | grep tomcat)" ]
    then
       return 1
    else
+      TomcatPak=true
+      return 0
+fi
+if [[ "$(ps -ef | grep -m 1 catalina | awk '{print $1}')" != "$USER" ]]
+   then
+      TomcatProc=true 
       return 0
 fi
 }
 
-#CheckVersionTomcat () {
-#
-#}
+GetVersionTomcat () {
+TomcatVersion=0
+if $TomcatPak
+   then
+      temp=$(ls /usr/share/ | grep -m 1 tomcat)
+      TomcatVersion=${temp//[^0-9]}
+      return 0 
+   else
+      temp=$(ps -ef | grep -m 1 catalina.home)
+      for i in $temp; do 
+         if [[ "$i" =~ "-Dcatalina.home=" ]]
+         then
+            PathToCatalina=$(echo $i | awk -F"=" '{ print $2 }')
+            break
+         fi
+      done
+      cmd="$PathToCatalina/bin/catalina.sh version"
+      temp=$(exec $cmd | grep "Server number")
+      TomcatVersion=${temp//[^0-9.]}
+      return 0
+fi
+}
 
 IsRoot () {
 if [ "$(id -u)" = "0" ]; 
@@ -83,6 +104,14 @@ if [ "$(id -u)" = "0" ];
       return 1
 fi
 }
+
+#if IsRoot
+#   then
+#   :
+#else
+#   echo "Все проверки пройдены, но для установки скрипт должен быть запущен от root"
+#   exit 1
+#fi
 
 if GetOSName
    then
@@ -131,17 +160,15 @@ fi
 
 if CheckInstallTomcat
    then
-      echo "Tomcat installed"
+      GetVersionTomcat
+      if [[ "$TomcatVersion" < "8" ]]
+         then
+            echo "Необходимо установить Tomcat 8"
+            exit 1
+      fi 
    else
-      echo "Tomcat not installed"
+      NeedTomcat
 fi
-#CheckVersionTomcat
 
-#if IsRoot
-#   then
-#   :
-#else
-#   echo "Все проверки пройдены, но для установки скрипт должен быть запущен от root"
-#   exit 1
-#fi
+
 
