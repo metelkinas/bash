@@ -105,13 +105,13 @@ if [ "$(id -u)" = "0" ];
 fi
 }
 
-#if IsRoot
-#   then
-#   :
-#else
-#   echo "Все проверки пройдены, но для установки скрипт должен быть запущен от root"
-#   exit 1
-#fi
+if IsRoot
+   then
+   :
+else
+   echo "Все проверки пройдены, но для установки скрипт должен быть запущен от root"
+   exit 1
+fi
 
 if GetOSName
    then
@@ -146,6 +146,7 @@ case $OSName in
    ;;
 esac
 
+NeedJava=false
 if CheckInstallJava
    then      
       GetVersionJava
@@ -158,6 +159,7 @@ if CheckInstallJava
       NeedJava=true
 fi
 
+NeedTomcat=false
 if CheckInstallTomcat
    then
       GetVersionTomcat
@@ -167,8 +169,67 @@ if CheckInstallTomcat
             exit 1
       fi 
    else
-      NeedTomcat
+      NeedTomcat=true
 fi
 
-
-
+if [ "$NeedJava" = "true" ] && [ "$NeedTomcat" = "true" ]
+   then
+      echo -n "Tomcat + Java. Продолжить? (y/n) "
+      read item
+      case "$item" in
+         y|Y) 
+            echo "Ввели «y», продолжаем..."
+            echo "Intsall All"     
+            NeedJava=false
+            NeedTomcat=false                       
+         ;;
+         n|N) 
+            echo "Ввели «n», завершаем..."
+            exit 0
+        ;;
+         *) 
+            echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+        ;;
+      esac
+fi
+if [ "$NeedJava" = "true" ]
+   then
+      echo -n "Java. Продолжить? (y/n) "
+      read item
+      case "$item" in
+         y|Y) 
+            echo "Ввели «y», продолжаем..."
+            echo "Intsall Java"   
+            NeedJava=false
+         ;;
+         n|N) 
+            echo "Ввели «n», завершаем..."
+            exit 0
+         ;;
+         *) 
+            echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+         ;;
+      esac
+fi         
+if [ "$NeedTomcat" = "true" ]
+   then
+      echo -n "Tomcat. Продолжить? (y/n) "
+      read item
+      case "$item" in
+         y|Y) 
+            echo "Ввели «y», продолжаем..."
+            echo "Intsall Tomcat"   
+            NeedTomcat=false
+         ;;
+         n|N) 
+            echo "Ввели «n», завершаем..."
+            exit 0
+         ;;
+         *) 
+            echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+         ;;
+      esac                    
+                       
+fi
+echo "install NGB"
+exit 0
