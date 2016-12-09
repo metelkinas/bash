@@ -96,6 +96,26 @@ if $TomcatPak
 fi
 }
 
+JavaInstall () {
+if type -p wget &> /dev/null
+then
+   :
+else
+case $OSName in
+   Ubuntu)
+      apt-get update 
+      apt-get install -y wget
+   ;;
+   CentOS|RHEL)
+      yum update
+      yum install -y wget
+   ;;
+esac   
+fi   
+cd /opt/
+wget http://download.java.net/java/jdk8u122/archive/b04/binaries/jdk-8u122-ea-bin-b04-linux-x64-25_oct_2016.tar.gz
+}
+
 IsRoot () {
 if [ "$(id -u)" = "0" ]; 
    then
@@ -172,6 +192,8 @@ if CheckInstallTomcat
       NeedTomcat=true
 fi
 
+NeedJava=true
+
 if [ "$NeedJava" = "true" ] && [ "$NeedTomcat" = "true" ]
    then
       echo -n "Tomcat + Java. Продолжить? (y/n) "
@@ -198,8 +220,7 @@ if [ "$NeedJava" = "true" ]
       read item
       case "$item" in
          y|Y) 
-            echo "Ввели «y», продолжаем..."
-            echo "Intsall Java"   
+            JavaInstall
             NeedJava=false
          ;;
          n|N) 
