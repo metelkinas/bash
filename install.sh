@@ -112,9 +112,48 @@ case $OSName in
    ;;
 esac   
 fi   
-cd /opt/
 wget http://download.java.net/java/jdk8u122/archive/b04/binaries/jdk-8u122-ea-bin-b04-linux-x64-25_oct_2016.tar.gz
+# добавить проверку существования директории
+mkdir /opt/java
+tar -xzf jdk-8u122-ea-bin-b04-linux-x64-25_oct_2016.tar.gz --strip-components=1 -C /opt/java
+rm -f jdk-8u122-ea-bin-b04-linux-x64-25_oct_2016.tar.gz
+echo "## Setting JAVA_HOME and PATH for all USERS ##" >> /etc/profile
+echo "export JAVA_HOME=/opt/java/jre" >> /etc/profile
+echo "export PATH=\$PATH:\$JAVA_HOME/bin" >> /etc/profile
+source /etc/profile
 }
+
+TomcatInstall () {
+if type -p wget &> /dev/null
+then
+   :
+else
+case $OSName in
+   Ubuntu)
+      apt-get update 
+      apt-get install -y wget
+   ;;
+   CentOS|RHEL)
+      yum update
+      yum install -y wget
+   ;;
+esac   
+fi   
+wget http://apache-mirror.rbc.ru/pub/apache/tomcat/tomcat-8/v8.5.8/bin/apache-tomcat-8.5.8.tar.gz
+# добавить проверку существования директории
+mkdir /opt/tomcat
+tar -xzf apache-tomcat-8.5.8.tar.gz --strip-components=1 -C /opt/tomcat
+rm -f apache-tomcat-8.5.8.tar.gz
+echo "## Setting Tomcat and PATH for all USERS ##" >> /etc/profile
+echo "export CATALINA_HOME=/opt/tomcat" >> /etc/profile
+echo "export PATH=\$PATH:\$CATALINA_HOME/bin" >> /etc/profile
+echo "export PATH=\$PATH:\$CATALINA_HOME/scripts" >> /etc/profile
+source /etc/profile
+}
+
+#TomcatCinfigure () {
+#
+#}
 
 IsRoot () {
 if [ "$(id -u)" = "0" ]; 
@@ -192,7 +231,8 @@ if CheckInstallTomcat
       NeedTomcat=true
 fi
 
-NeedJava=true
+NeedJava=false
+NeedTomcat=true
 
 if [ "$NeedJava" = "true" ] && [ "$NeedTomcat" = "true" ]
    then
@@ -200,8 +240,8 @@ if [ "$NeedJava" = "true" ] && [ "$NeedTomcat" = "true" ]
       read item
       case "$item" in
          y|Y) 
-            echo "Ввели «y», продолжаем..."
-            echo "Intsall All"     
+            JavaInstall
+            TomcatInstall   
             NeedJava=false
             NeedTomcat=false                       
          ;;
@@ -238,8 +278,7 @@ if [ "$NeedTomcat" = "true" ]
       read item
       case "$item" in
          y|Y) 
-            echo "Ввели «y», продолжаем..."
-            echo "Intsall Tomcat"   
+            TomcatInstall  
             NeedTomcat=false
          ;;
          n|N) 
