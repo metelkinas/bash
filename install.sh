@@ -149,9 +149,7 @@ echo "export CATALINA_HOME=/opt/tomcat" >> /etc/profile
 echo "export PATH=\$PATH:\$CATALINA_HOME/bin" >> /etc/profile
 echo "export PATH=\$PATH:\$CATALINA_HOME/scripts" >> /etc/profile
 source /etc/profile
-}
 
-TomcatCinfigure () {
 groupadd tomcat
 useradd -M -d /opt/tomcat/ -g tomcat -s /sbin/nologin tomcat
 cd /opt/tomcat
@@ -159,11 +157,13 @@ chgrp -R tomcat conf
 chmod g+rwx conf
 chmod g+r conf/*
 chown -R tomcat webapps/ work/ temp/ logs/
-
+cd /opt/tomcat
+chgrp -R tomcat conf
+chmod g+r conf/*
+echo JAVA_OPTS="-Xms256m -Xmx2048m -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m" > /opt/tomcat/bin/setenv.sh
 
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "14" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
-   then
-      echo JAVA_OPTS="-Xms256m -Xmx2048m -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m" > /opt/tomcat/bin/setenv.sh
+   then    
       echo "# Systemd unit file for tomcat" > /etc/systemd/system/tomcat.service
       echo "[Unit]" >> /etc/systemd/system/tomcat.service
       echo "Description=Apache Tomcat Web Application Container" >> /etc/systemd/system/tomcat.service
@@ -183,7 +183,6 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "14" ] || [ "$OSName" = "CentO
       echo "[Install]" >> /etc/systemd/system/tomcat.service
       echo "WantedBy=multi-user.target" >> /etc/systemd/system/tomcat.service
       systemctl daemon-reload
-#      systemctl start tomcat
       systemctl enable tomcat   
    else
       echo "systemd"
@@ -217,10 +216,6 @@ echo "database.initial.pool.size=5" >> /opt/tomcat/conf/catgenome/catgenome.prop
 echo "database.driver.class=org.h2.Driver" >> /opt/tomcat/conf/catgenome/catgenome.properties
 echo "database.jdbc.url=jdbc:h2:file:/opt/catgenome/H2/catgenome" >> /opt/tomcat/conf/catgenome/catgenome.properties
 
-cd /opt/tomcat
-chgrp -R tomcat conf
-chmod g+r conf/*
-
 cd /opt
 mkdir catgenome
 chown tomcat:tomcat catgenome
@@ -238,6 +233,8 @@ tar -xzf ngb-cli.tar.gz
 rm -f ngb-cli.tar.gz
 echo "export PATH=$PATH:/opt/catgenome/ngb-cli" >> /etc/profile
 source /etc/profile
+
+sed -i '/Connector port="8080"/,/redirectPort="8443" /c\<Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" compression="on" compressionMinSize="2048" compressableMimeType="text/html,text/xml,application/json" redirectPort="8443"/>' server.xml
 
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "14" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then     
@@ -333,7 +330,7 @@ if [ "$NeedJava" = "true" ] && [ "$NeedTomcat" = "true" ]
       case "$item" in
          y|Y) 
             JavaInstall
-            TomcatInstall   
+            TomcatInstall               
             NeedJava=false
             NeedTomcat=false                       
          ;;
@@ -370,7 +367,7 @@ if [ "$NeedTomcat" = "true" ]
       read item
       case "$item" in
          y|Y) 
-            TomcatInstall  
+            TomcatInstall              
             NeedTomcat=false
          ;;
          n|N) 
