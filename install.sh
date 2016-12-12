@@ -151,9 +151,37 @@ echo "export PATH=\$PATH:\$CATALINA_HOME/scripts" >> /etc/profile
 source /etc/profile
 }
 
-#TomcatCinfigure () {
-#
-#}
+TomcatCinfigure () {
+groupadd tomcat
+useradd -M -d /opt/tomcat/ -g tomcat -s /sbin/nologin tomcat
+cd /opt/tomcat
+chgrp -R tomcat conf
+chmod g+rwx conf
+chmod g+r conf/*
+chown -R tomcat webapps/ work/ temp/ logs/
+echo JAVA_OPTS="-Xms256m -Xmx2048m -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m" > /opt/tomcat/bin/setenv.sh
+echo "# Systemd unit file for tomcat" > /etc/systemd/system/tomcat.service
+echo "[Unit]" >> /etc/systemd/system/tomcat.service
+echo "Description=Apache Tomcat Web Application Container" >> /etc/systemd/system/tomcat.service
+echo "After=syslog.target network.target" >> /etc/systemd/system/tomcat.service
+echo "[Service]" >> /etc/systemd/system/tomcat.service
+echo "Type=forking" >> /etc/systemd/system/tomcat.service
+echo "Environment=JAVA_HOME=opt/java/jre" >> /etc/systemd/system/tomcat.service
+echo "Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid" >> /etc/systemd/system/tomcat.service
+echo "Environment=CATALINA_HOME=/opt/tomcat" >> /etc/systemd/system/tomcat.service
+echo "Environment=CATALINA_BASE=/opt/tomcat" >> /etc/systemd/system/tomcat.service
+echo "Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'" >> /etc/systemd/system/tomcat.service
+echo "Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'" >> /etc/systemd/system/tomcat.service
+echo "ExecStart=/opt/tomcat/bin/startup.sh" >> /etc/systemd/system/tomcat.service
+echo "ExecStop=/bin/kill -15 $MAINPID" >> /etc/systemd/system/tomcat.service
+echo "User=tomcat" >> /etc/systemd/system/tomcat.service
+echo "Group=tomcat" >> /etc/systemd/system/tomcat.service
+echo "[Install]" >> /etc/systemd/system/tomcat.service
+echo "WantedBy=multi-user.target" >> /etc/systemd/system/tomcat.service
+systemctl daemon-reload
+systemctl start tomcat
+systemctl enable tomcat
+}
 
 IsRoot () {
 if [ "$(id -u)" = "0" ]; 
