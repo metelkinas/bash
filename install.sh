@@ -159,28 +159,92 @@ chgrp -R tomcat conf
 chmod g+rwx conf
 chmod g+r conf/*
 chown -R tomcat webapps/ work/ temp/ logs/
-echo JAVA_OPTS="-Xms256m -Xmx2048m -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m" > /opt/tomcat/bin/setenv.sh
-echo "# Systemd unit file for tomcat" > /etc/systemd/system/tomcat.service
-echo "[Unit]" >> /etc/systemd/system/tomcat.service
-echo "Description=Apache Tomcat Web Application Container" >> /etc/systemd/system/tomcat.service
-echo "After=syslog.target network.target" >> /etc/systemd/system/tomcat.service
-echo "[Service]" >> /etc/systemd/system/tomcat.service
-echo "Type=forking" >> /etc/systemd/system/tomcat.service
-echo "Environment=JAVA_HOME=opt/java/jre" >> /etc/systemd/system/tomcat.service
-echo "Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid" >> /etc/systemd/system/tomcat.service
-echo "Environment=CATALINA_HOME=/opt/tomcat" >> /etc/systemd/system/tomcat.service
-echo "Environment=CATALINA_BASE=/opt/tomcat" >> /etc/systemd/system/tomcat.service
-echo "Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'" >> /etc/systemd/system/tomcat.service
-echo "Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'" >> /etc/systemd/system/tomcat.service
-echo "ExecStart=/opt/tomcat/bin/startup.sh" >> /etc/systemd/system/tomcat.service
-echo "ExecStop=/bin/kill -15 $MAINPID" >> /etc/systemd/system/tomcat.service
-echo "User=tomcat" >> /etc/systemd/system/tomcat.service
-echo "Group=tomcat" >> /etc/systemd/system/tomcat.service
-echo "[Install]" >> /etc/systemd/system/tomcat.service
-echo "WantedBy=multi-user.target" >> /etc/systemd/system/tomcat.service
-systemctl daemon-reload
-systemctl start tomcat
-systemctl enable tomcat
+
+
+if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "14" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
+   then
+      echo JAVA_OPTS="-Xms256m -Xmx2048m -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m" > /opt/tomcat/bin/setenv.sh
+      echo "# Systemd unit file for tomcat" > /etc/systemd/system/tomcat.service
+      echo "[Unit]" >> /etc/systemd/system/tomcat.service
+      echo "Description=Apache Tomcat Web Application Container" >> /etc/systemd/system/tomcat.service
+      echo "After=syslog.target network.target" >> /etc/systemd/system/tomcat.service
+      echo "[Service]" >> /etc/systemd/system/tomcat.service
+      echo "Type=forking" >> /etc/systemd/system/tomcat.service
+      echo "Environment=JAVA_HOME=/opt/java/jre" >> /etc/systemd/system/tomcat.service
+      echo "Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid" >> /etc/systemd/system/tomcat.service
+      echo "Environment=CATALINA_HOME=/opt/tomcat" >> /etc/systemd/system/tomcat.service
+      echo "Environment=CATALINA_BASE=/opt/tomcat" >> /etc/systemd/system/tomcat.service
+      echo "Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'" >> /etc/systemd/system/tomcat.service
+      echo "Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'" >> /etc/systemd/system/tomcat.service
+      echo "ExecStart=/opt/tomcat/bin/startup.sh" >> /etc/systemd/system/tomcat.service
+      echo "ExecStop=/bin/kill -15 $MAINPID" >> /etc/systemd/system/tomcat.service
+      echo "User=tomcat" >> /etc/systemd/system/tomcat.service
+      echo "Group=tomcat" >> /etc/systemd/system/tomcat.service
+      echo "[Install]" >> /etc/systemd/system/tomcat.service
+      echo "WantedBy=multi-user.target" >> /etc/systemd/system/tomcat.service
+      systemctl daemon-reload
+#      systemctl start tomcat
+      systemctl enable tomcat   
+   else
+      echo "systemd"
+fi
+}
+
+NGBInstall () { 
+if type -p wget &> /dev/null
+then
+   :
+else
+case $OSName in
+   Ubuntu)
+      apt-get update 
+      apt-get install -y wget
+   ;;
+   CentOS|RHEL)
+      yum update
+      yum install -y wget
+   ;;
+esac   
+fi   
+echo "CATGENOME_CONF_DIR=/opt/tomcat/conf/catgenome/" >> /opt/tomcat/conf/catalina.poperties
+
+mkdir /opt/tomcat/conf/catgenome/
+echo "files.base.directory.path=/opt/catgenome/contents" > /opt/tomcat/conf/catgenome/catgenome.properties
+echo "database.max.pool.size=25" >> /opt/tomcat/conf/catgenome/catgenome.properties
+echo "database.username=catgenome" >> /opt/tomcat/conf/catgenome/catgenome.properties
+echo "database.password=" >> /opt/tomcat/conf/catgenome/catgenome.properties
+echo "database.initial.pool.size=5" >> /opt/tomcat/conf/catgenome/catgenome.properties
+echo "database.driver.class=org.h2.Driver" >> /opt/tomcat/conf/catgenome/catgenome.properties
+echo "database.jdbc.url=jdbc:h2:file:/opt/catgenome/H2/catgenome" >> /opt/tomcat/conf/catgenome/catgenome.properties
+
+cd /opt/tomcat
+chgrp -R tomcat conf
+chmod g+r conf/*
+
+cd /opt
+mkdir catgenome
+chown tomcat:tomcat catgenome
+chgrp -R tomcat catgenome
+chmod g+w catgenome
+
+cd /opt/tomcat/webapps/
+wget http://52.38.214.1/distr/latest/catgenome.war
+
+mkdir /opt/catgenome/ngb-cli
+cd /opt/catgenome/ngb-cli
+
+wget http://52.38.214.1/distr/latest/ngb-cli.tar.gz
+tar -xzf ngb-cli.tar.gz
+rm -f ngb-cli.tar.gz
+echo "export PATH=$PATH:/opt/catgenome/ngb-cli" >> /etc/profile
+source /etc/profile
+
+if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "14" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
+   then     
+      systemctl start tomcat
+   else
+      :
+fi
 }
 
 IsRoot () {
@@ -319,5 +383,7 @@ if [ "$NeedTomcat" = "true" ]
       esac                    
                        
 fi
-echo "install NGB"
+
+NGBInstall
+
 exit 0
