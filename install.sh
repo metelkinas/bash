@@ -257,7 +257,7 @@ if IsRoot
    then
    :
 else
-   echo "Все проверки пройдены, но для установки скрипт должен быть запущен от root"
+   echo "Для установки скрипт должен быть запущен от root"
    exit 1
 fi
 
@@ -320,9 +320,6 @@ if CheckInstallTomcat
       NeedTomcat=true
 fi
 
-NeedJava=false
-NeedTomcat=true
-
 if [ "$NeedJava" = "true" ] && [ "$NeedTomcat" = "true" ]
    then
       echo -n "Tomcat + Java. Продолжить? (y/n) "
@@ -376,6 +373,7 @@ if [ "$NeedTomcat" = "true" ]
          ;;
          *) 
             echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+            exit 0
          ;;
       esac                    
                        
