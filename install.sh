@@ -271,6 +271,7 @@ if GetOSName
 fi
 
 GetOSVersion
+OSVersion=$(echo $OSVersion | awk -F'.' '{print $1}')
 case $OSName in
    Ubuntu)
       if [[ "$OSVersion" < "14" ]]
