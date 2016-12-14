@@ -166,13 +166,6 @@ chgrp -R tomcat /opt/tomcat
 chmod -R g+r conf
 chmod g+x conf
 chown -R tomcat webapps/ work/ temp/ logs/
-#chgrp -R tomcat conf
-#chmod g+rwx conf
-#chmod g+r conf/*
-#chown -R tomcat webapps/ work/ temp/ logs/
-#cd /opt/tomcat
-#chgrp -R tomcat conf
-#chmod g+r conf/*
 echo -e "JAVA_OPTS=\042-Xms256m -Xmx2048m -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m\042" > /opt/tomcat/bin/setenv.sh
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "14" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then    
