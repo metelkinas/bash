@@ -325,7 +325,7 @@ case $OSName in
    ;;
 esac   
 fi   
-echo "CATGENOME_CONF_DIR=/opt/tomcat/conf/catgenome/" >> /opt/tomcat/conf/catalina.poperties
+echo "CATGENOME_CONF_DIR=/opt/tomcat/conf/catgenome/" >> /opt/tomcat/conf/catalina.properties
 mkdir /opt/tomcat/conf/catgenome/
 echo "files.base.directory.path=/opt/catgenome/contents" > /opt/tomcat/conf/catgenome/catgenome.properties
 echo "database.max.pool.size=25" >> /opt/tomcat/conf/catgenome/catgenome.properties
@@ -364,7 +364,7 @@ cd /opt/tomcat/conf
 sed -i '/Connector port="8080"/,/redirectPort="8443" /c\<Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" compression="on" compressionMinSize="2048" compressableMimeType="text/html,text/xml,application/json" redirectPort="8443"/>' server.xml
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "14" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then     
-      systemctl start tomcat
+      systemctl restart tomcat
    else
       service tomcat start
 fi
