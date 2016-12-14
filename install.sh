@@ -21,7 +21,9 @@ return 1
 GetOSVersion () {
 if [ "$OSName" = "Ubuntu" ]
    then
-      OSVersion=$(lsb_release -rs)
+#      OSVersion=$(lsb_release -rs)
+      temp=$(cat /etc/*-release | grep -m 1 VERSION)
+      OSVersion=${temp//[^0-9.]}
       return 0	
 fi
 if [ "$OSName" = "RHEL" ]
