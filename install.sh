@@ -52,19 +52,20 @@ if [ "$OSName" = "Ubuntu" ]
    then
       if [ -z "$(dpkg -l | grep tomcat)" ]
          then
-            return 1 
+            : 
          else
             TomcatPak=true
             return 0   
       fi
-fi
-if [ -z "$(yum list installed | grep tomcat)" ]
-   then
-      return 1
-   else
-      TomcatPak=true
-      return 0
-fi
+   else   
+      if [ -z "$(yum list installed | grep tomcat)" ]
+         then
+            :
+         else
+            TomcatPak=true
+            return 0
+      fi
+fi      
 if [[ "$(ps -ef | grep -m 1 catalina | awk '{print $1}')" != "$USER" ]]
    then
       TomcatProc=true 
