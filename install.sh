@@ -71,6 +71,7 @@ if [[ "$(ps -ef | grep -m 1 catalina | awk '{print $1}')" != "$USER" ]]
       TomcatProc=true 
       return 0
 fi
+return 1
 }
 GetVersionTomcat () {
 TomcatVersion=0
