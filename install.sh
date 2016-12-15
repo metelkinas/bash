@@ -194,6 +194,10 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
    else
       cd /etc/init.d/
       echo -e "\043\041/bin/bash" > tomcat
+      if ! [ "$OSName" = "Ubuntu"]
+         then
+            echo -e "# chkconfig: - 80 20" >> tomcat
+      fi
       echo -e "export JAVA_HOME=/opt/java/jre" >> tomcat
       echo -e "export PATH=\044JAVA_HOME/bin:\044PATH" >> tomcat
       echo -e "TOMCAT_HOME=/opt/tomcat" >> tomcat
