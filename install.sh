@@ -106,7 +106,7 @@ case $OSName in
       apt-get install -y wget
    ;;
    CentOS|RHEL)
-      yum update
+      #yum update
       yum install -y wget
    ;;
 esac   
@@ -139,7 +139,7 @@ case $OSName in
       apt-get install -y wget
    ;;
    CentOS|RHEL)
-      yum update
+      #yum update
       yum install -y wget
    ;;
 esac   
@@ -289,7 +289,7 @@ case $OSName in
       apt-get install -y wget
    ;;
    CentOS|RHEL)
-      yum update
+      #yum update
       yum install -y wget
    ;;
 esac   
