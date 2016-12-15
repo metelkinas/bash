@@ -320,7 +320,7 @@ cd /opt/catgenome/ngb-cli
 wget http://52.38.214.1/distr/latest/ngb-cli.tar.gz
 tar -xzf ngb-cli.tar.gz
 rm -f ngb-cli.tar.gz
-echo "export PATH=$PATH:/opt/catgenome/ngb-cli" >> /etc/profile
+echo "export PATH=$PATH:/opt/catgenome/ngb-cli/bin/" >> /etc/profile
 source /etc/profile
 cd /opt/tomcat/conf
 sed -i '/Connector port="8080"/,/redirectPort="8443" /c\<Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" compression="on" compressionMinSize="2048" compressableMimeType="text/html,text/xml,application/json" redirectPort="8443"/>' server.xml
