@@ -268,7 +268,14 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
       chmod +x tomcat
       usermod tomcat -s /bin/bash
       #/etc/shadow
-      #update-rc.d tomcat defaults
+      if [ "$OSName" = "Ubuntu" ]
+         then
+            update-rc.d tomcat defaults
+         else
+            chkconfig --add tomcat
+            chkconfig --level 234 tomcat on
+            chkconfig --list tomcat
+      fi
 fi
 }
 NGBInstall () { 
