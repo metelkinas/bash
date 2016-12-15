@@ -169,7 +169,7 @@ chmod -R g+r conf
 chmod g+x conf
 chown -R tomcat webapps/ work/ temp/ logs/
 echo -e "JAVA_OPTS=\042-Xms256m -Xmx2048m -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m\042" > /opt/tomcat/bin/setenv.sh
-if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "14" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
+if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "15" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then    
       echo "# Systemd unit file for tomcat" > /etc/systemd/system/tomcat.service
       echo "[Unit]" >> /etc/systemd/system/tomcat.service
@@ -196,112 +196,80 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "14" ] || [ "$OSName" = "CentO
       echo -e "\043\041/bin/bash" > tomcat
       echo -e "export JAVA_HOME=/opt/java/jre" >> tomcat
       echo -e "export PATH=\044JAVA_HOME/bin:\044PATH" >> tomcat
-      echo -e "export CATALINA_HOME=/opt/tomcat" >> tomcat
-      echo -e "export CATALINA_BASE=/opt/tomcat" >> tomcat
-      echo -e "export TOMCAT_USER=tomcat" >> tomcat
-      echo -e "TOMCAT_USAGE=\042Usage: \044\060 {\e[00;32mstart\e[00m|\e[00;31mstop\e[00m|\e[00;31mkill\e[00m|\e[00;32mstatus\e[00m|\e[00;31mrestart\e[00m}\042" >> tomcat
+      echo -e "TOMCAT_HOME=/opt/tomcat" >> tomcat
+      echo -e "TOMCAT_USER=tomcat" >> tomcat
       echo -e "SHUTDOWN_WAIT=20" >> tomcat
-      echo -e "" >> tomcat  
+      echo -e "" >> tomcat
       echo -e "tomcat_pid() {" >> tomcat
-      echo -e " echo \047ps -fe | grep \044CATALINA_BASE | grep -v grep | tr -s \042 \042|cut -d\042 \042 -f2\047" >> tomcat
+      echo -e "  echo \0140ps aux | grep org.apache.catalina.startup.Bootstrap | grep -v grep | awk \047{ print \044\062 }\047\0140" >> tomcat
       echo -e "}" >> tomcat
-      echo -e "" >> tomcat 
+      echo -e "" >> tomcat
       echo -e "start() {" >> tomcat
-      echo -e " pid=\044(tomcat_pid)" >> tomcat
-      echo -e " if [ -n \042\044pid\042 ]" >> tomcat
-      echo -e " then" >> tomcat
-      echo -e " echo -e \042\e[00;31mTomcat is already running (pid: \044pid)\e[00m\042" >> tomcat
-      echo -e " else" >> tomcat
-      echo -e " echo -e \042\e[00;32mStarting tomcat\e[00m\042" >> tomcat
-      echo -e " if [ \047user_exists \044TOMCAT_USER\047 = \042\061\042 ]" >> tomcat
-      echo -e " then" >> tomcat
-      echo -e " /bin/su \044TOMCAT_USER -c \044CATALINA_HOME/bin/startup.sh" >> tomcat
-      echo -e " else" >> tomcat
-      echo -e " echo -e \042\e[00;31mTomcat user \044TOMCAT_USER does not exists. Starting with \044(id)\e[00m\042" >> tomcat
-      echo -e " sh \044CATALINA_HOME/bin/startup.sh" >> tomcat
-      echo -e " fi" >> tomcat
-      echo -e " status" >> tomcat
-      echo -e " fi" >> tomcat
-      echo -e " return 0" >> tomcat
-      echo -e "}" >> tomcat
-      echo -e "" >> tomcat
-      echo -e "status(){" >> tomcat
-      echo -e " pid=\044(tomcat_pid)" >> tomcat
-      echo -e " if [ -n \042\044pid\042 ]" >> tomcat
-      echo -e " then echo -e \042\e[00;32mTomcat is running with pid: \044pid\e[00m\042" >> tomcat
-      echo -e " else" >> tomcat
-      echo -e " echo -e \042\e[00;31mTomcat is not running\e[00m\042" >> tomcat
-      echo -e " return 3" >> tomcat
-      echo -e " fi" >> tomcat
-      echo -e "}" >> tomcat
-      echo -e "" >> tomcat
-      echo -e "terminate() {" >> tomcat
-      echo -e " echo -e \042\e[00;31mTerminating Tomcat\e[00m\042" >> tomcat
-      echo -e " kill -9 \044(tomcat_pid)" >> tomcat
+      echo -e "  pid=\044(tomcat_pid)" >> tomcat
+      echo -e "  if [ -n \042\044pid\042 ]" >> tomcat
+      echo -e "  then" >> tomcat
+      echo -e "    echo \042Tomcat is already running (pid: \044pid)\042" >> tomcat
+      echo -e "  else" >> tomcat
+      echo -e "    \043 Start tomcat" >> tomcat
+      echo -e "    echo \042Starting tomcat\042" >> tomcat
+      echo -e "    ulimit -n 100000" >> tomcat
+      echo -e "    umask 007" >> tomcat
+      echo -e "    /bin/su -p -s /bin/sh \044TOMCAT_USER \044TOMCAT_HOME/bin/startup.sh" >> tomcat
+      echo -e "  fi" >> tomcat
+      echo -e "  return 0" >> tomcat
       echo -e "}" >> tomcat
       echo -e "" >> tomcat
       echo -e "stop() {" >> tomcat
-      echo -e " pid=\044(tomcat_pid)" >> tomcat
-      echo -e " if [ -n \042\044pid\042 ]" >> tomcat
-      echo -e " then" >> tomcat
-      echo -e " echo -e \042\e[00;31mStoping Tomcat\e[00m\042" >> tomcat
-      echo -e " sh \044CATALINA_HOME/bin/shutdown.sh" >> tomcat
+      echo -e "  pid=\044(tomcat_pid)" >> tomcat
+      echo -e "  if [ -n \042\044pid\042 ]" >> tomcat
+      echo -e "  then" >> tomcat
+      echo -e "    echo \042Stoping Tomcat\042" >> tomcat
+      echo -e "    /bin/su -p -s /bin/sh \044TOMCAT_USER \044TOMCAT_HOME/bin/shutdown.sh" >> tomcat
+      echo -e "    let kwait=\044SHUTDOWN_WAIT" >> tomcat
+      echo -e "    count=0;" >> tomcat
+      echo -e "    until [ \0140ps -p \044pid | grep -c \044pid\0140 = \047\060\047 ] || [ \044count -gt \044kwait ]" >> tomcat
+      echo -e "    do" >> tomcat
+      echo -e "      echo -n -e \042\0134\0156waiting for processes to exit\042;" >> tomcat
+      echo -e "      sleep 1" >> tomcat
+      echo -e "      let count=\044count+1;" >> tomcat
+      echo -e "    done" >> tomcat
+      echo -e "    if [ \044count -gt \044kwait ]; then" >> tomcat
+      echo -e "      echo -n -e \042\0134\0156killing processes which didnot stop after \044SHUTDOWN_WAIT seconds\042" >> tomcat
+      echo -e "      kill -9 \044pid" >> tomcat
+      echo -e "    fi" >> tomcat
+      echo -e "  else" >> tomcat
+      echo -e "    echo \042Tomcat is not running\042" >> tomcat
+      echo -e "  fi" >> tomcat
+      echo -e "  return 0" >> tomcat
+      echo -e "}" >> tomcat
       echo -e "" >> tomcat
-      echo -e " let kwait=\044SHUTDOWN_WAIT" >> tomcat
-      echo -e " count=0;" >> tomcat
-      echo -e " until [ \047ps -p \044pid | grep -c \044pid\047 = '0' ] || [ \044count -gt \044kwait ]" >> tomcat
-      echo -e " do" >> tomcat
-      echo -e " echo -n -e \042\e[00;31mwaiting for processes to exit\e[00m\042;" >> tomcat
-      echo -e " sleep 1" >> tomcat
-      echo -e " let count=\044count+1;" >> tomcat
-      echo -e " done" >> tomcat
-      echo -e "" >> tomcat 
-      echo -e " if [ \044count -gt \044kwait ]; then" >> tomcat
-      echo -e " echo -n -e \042\e[00;31mkilling processes didn't stop after \044SHUTDOWN_WAIT seconds\e[00m\042" >> tomcat
-      echo -e " terminate" >> tomcat
-      echo -e " fi" >> tomcat
-      echo -e " else" >> tomcat
-      echo -e " echo -e \042\e[00;31mTomcat is not running\e[00m\042" >> tomcat
-      echo -e " fi" >> tomcat
-      echo -e "" >> tomcat 
-      echo -e " return 0" >> tomcat
-      echo -e "}" >> tomcat
-      echo -e "" >> tomcat 
-      echo -e "user_exists(){" >> tomcat
-      echo -e " if id -u \0441 >/dev/null 2>&1; then" >> tomcat
-      echo -e " echo \042\061\042" >> tomcat
-      echo -e " else" >> tomcat
-      echo -e " echo \042\060\042" >> tomcat
-      echo -e " fi" >> tomcat
-      echo -e "}" >> tomcat
-      echo -e "" >> tomcat 
       echo -e "case \044\061 in" >> tomcat
-      echo -e " start)" >> tomcat
-      echo -e " start" >> tomcat
-      echo -e " ;;" >> tomcat
-      echo -e " stop)" >> tomcat
-      echo -e " stop" >> tomcat
-      echo -e " ;;" >> tomcat
-      echo -e " restart)" >> tomcat
-      echo -e " stop" >> tomcat
-      echo -e " start" >> tomcat
-      echo -e " ;;" >> tomcat
-      echo -e " status)" >> tomcat
-      echo -e " status" >> tomcat
-      echo -e " exit \044?" >> tomcat 
-      echo -e " ;;" >> tomcat
-      echo -e " kill)" >> tomcat
-      echo -e " terminate" >> tomcat
-      echo -e " ;;" >> tomcat 
-      echo -e " *)" >> tomcat
-      echo -e " echo -e \044TOMCAT_USAGE" >> tomcat
-      echo -e " ;;" >> tomcat
-      echo -e "esac" >> tomcat 
+      echo -e "start)" >> tomcat
+      echo -e "  start" >> tomcat
+      echo -e ";;" >> tomcat
+      echo -e "stop)" >> tomcat
+      echo -e "  stop" >> tomcat
+      echo -e ";;" >> tomcat 
+      echo -e "restart)" >> tomcat
+      echo -e "  stop" >> tomcat
+      echo -e "  start" >> tomcat
+      echo -e ";;" >> tomcat
+      echo -e "status)" >> tomcat
+      echo -e "  pid=\044(tomcat_pid)" >> tomcat
+      echo -e "  if [ -n \042\044pid\042 ]" >> tomcat
+      echo -e "  then" >> tomcat
+      echo -e "    echo \042Tomcat is running with pid: \044pid\042" >> tomcat
+      echo -e "  else" >> tomcat
+      echo -e "    echo \042Tomcat is not running\042" >> tomcat
+      echo -e " fi" >> tomcat
+      echo -e ";;" >> tomcat 
+      echo -e "esac" >> tomcat
       echo -e "exit 0" >> tomcat
       chmod +x tomcat
       usermod tomcat -s /bin/bash
       #/etc/shadow
       update-rc.d tomcat defaults
+      exit 0
 fi
 }
 NGBInstall () { 
