@@ -342,7 +342,7 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
       systemctl restart tomcat
       if [ "$?" -ne 0 ]
          then
-            echo "Error run tomcat. Run manual"
+            echo "Error run tomcat. Run manual (y/n)"
             read item
             case "$item" in
             y|Y) 
@@ -362,7 +362,7 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
       service tomcat start
       if [ "$?" -ne 0 ]
          then
-            echo "Error run tomcat. Run manual"
+            echo "Error run tomcat. Run manual (y/n)"
             read item
             case "$item" in
             y|Y) 
@@ -523,3 +523,11 @@ if [ "$NeedTomcat" = "true" ]
 fi
 NGBInstall
 exit 0
+
+#For JAVA_HOME
+#jv=$(whereis java | awk '{print $2}')
+#while [ -L $jv ]
+#do
+#   jv=$(ls -la $jv | awk '{print $11}')
+#done
+#echo $jv
