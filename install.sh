@@ -168,7 +168,7 @@ chgrp -R tomcat /opt/tomcat
 chmod -R g+r conf
 chmod g+x conf
 chown -R tomcat webapps/ work/ temp/ logs/
-echo -e "JAVA_OPTS=\042-Xms256m -Xmx2048m -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m\042" > /opt/tomcat/bin/setenv.sh
+echo -e "JAVA_OPTS=\042-Xms256m -Xmx$mem\0155 -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m\042" > /opt/tomcat/bin/setenv.sh
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then    
       echo "# Systemd unit file for tomcat" > /etc/systemd/system/tomcat.service
@@ -321,14 +321,16 @@ if [ -f catgenome.war ]
    then
       rm -f catgenome.war
 fi      
-wget http://52.38.214.1/distr/latest/catgenome.war
+wget http://52.38.214.1/distr/$ver/catgenome-$ver.war
+rm catgenome-$ver.war catgenome.war
 if [ -d /opt/catgenome/ngb-cli ]
    then
       rm -Rf /opt/catgenome/ngb-cli
 fi   
 mkdir /opt/catgenome/ngb-cli
 cd /opt/catgenome/ngb-cli
-wget http://52.38.214.1/distr/latest/ngb-cli.tar.gz
+wget http://52.38.214.1/distr/$ver/ngb-cli-$ver.tar.gz
+rm ngb-cli-$ver.tar.gz ngb-cli.tar.gz
 tar -xzf ngb-cli.tar.gz
 rm -f ngb-cli.tar.gz
 echo "export PATH=$PATH:/opt/catgenome/ngb-cli/bin/" >> /etc/profile
@@ -341,7 +343,6 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
       if [ "$?" -ne 0 ]
          then
             echo "Error run tomcat. Run manual"
-
             read item
             case "$item" in
             y|Y) 
@@ -353,6 +354,7 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
             ;; 
             *) 
                echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+               exit 1
             ;;
             esac
       fi
@@ -372,6 +374,7 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
             ;;       
             *) 
                echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+               exit 1
             ;;
             esac
       fi     
@@ -385,6 +388,19 @@ if [ "$(id -u)" = "0" ];
       return 1
 fi
 }
+
+mem=2048
+ver=latest
+while getopts "m:v:" opt
+do
+case $opt in
+m) mem=$OPTARG
+;;
+v) ver=$OPTARG
+;;
+*) : ;;
+esac
+done
 if IsRoot
    then
    :
