@@ -338,7 +338,7 @@ sed -i '/Connector port="8080"/,/redirectPort="8443" /c\<Connector port="8080" p
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then     
       systemctl restart tomcat
-      if [ "$?" -ne "0" ]
+      if [ "$?" -ne 0 ]
          then
             echo "Error run tomcat. Run manual"
 
@@ -350,15 +350,17 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
             n|N) 
                echo "Ввели «n», завершаем..."             
                exit 1
-            ;;            
+            ;; 
+            *) 
+               echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+            ;;
             esac
       fi
    else
       service tomcat start
-      if [ $? ne 0 ]
+      if [ "$?" -ne 0 ]
          then
             echo "Error run tomcat. Run manual"
-
             read item
             case "$item" in
             y|Y) 
@@ -367,7 +369,10 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
             n|N) 
                echo "Ввели «n», завершаем..."             
                exit 1
-            ;;            
+            ;;       
+            *) 
+               echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+            ;;
             esac
       fi     
 fi
