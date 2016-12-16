@@ -338,7 +338,7 @@ sed -i '/Connector port="8080"/,/redirectPort="8443" /c\<Connector port="8080" p
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then     
       systemctl restart tomcat
-      if [ $? ne 0 ]
+      if [ "$?" -ne "0" ]
          then
             echo "Error run tomcat. Run manual"
 
