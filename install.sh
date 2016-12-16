@@ -66,7 +66,7 @@ if [ "$OSName" = "Ubuntu" ]
             return 0
       fi
 fi      
-if [[ "$(ps -ef | grep -m 1 catalina | awk '{print $1}')" != "$USER" ]]
+if [[ "$(ps -ef | grep -m 1 catalina | awk '{print $1}')" != "root" ]]
    then
       TomcatProc=true 
       return 0
