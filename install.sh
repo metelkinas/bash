@@ -21,7 +21,6 @@ return 1
 GetOSVersion () {
 if [ "$OSName" = "Ubuntu" ]
    then
-#      OSVersion=$(lsb_release -rs)
       temp=$(cat /etc/*-release | grep -m 1 VERSION)
       OSVersion=${temp//[^0-9.]}
       return 0	
@@ -44,6 +43,21 @@ fi
 }
 GetVersionJava () {
 JavaVer=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+}
+FindJavaHome() {
+if [ -n $(echo $JAVA_HOME) ]
+then
+   jh=$(whereis java | awk '{print $2}')
+   while [ -L $jh ]
+   do
+      jh=$(ls -la $jh | awk '{print $11}')
+   done
+   jh=$(echo $jh | sed 's/\/bin\/java//')
+   fi
+   echo "## Setting JAVA_HOME and PATH for all USERS ##" >> /etc/profile
+   echo "export JAVA_HOME=$jh" >> /etc/profile
+   echo "export PATH=\$PATH:\$JAVA_HOME/bin" >> /etc/profile
+   source /etc/profile   
 }
 CheckInstallTomcat () {
 TomcatProc=false
@@ -94,6 +108,17 @@ if $TomcatPak
       TomcatVersion=${temp//[^0-9.]}
       return 0
 fi
+}
+FindTomcatConfig () {
+temp=$(ps -ef | grep -m 1 catalina.home)
+for i in $temp; do 
+   if [[ "$i" =~ "-Djava.util.logging.config.file" ]]
+   then
+      PathToCatalinaConfig=$(echo $i | awk -F"=" '{ print $2 }')
+      break
+   fi
+done
+PathToCatalinaConfig=$(echo $PathToCatalinaConfig | sed 's/\/logging.properties//')
 }
 JavaInstall () {
 if type -p wget &> /dev/null
@@ -169,6 +194,7 @@ chmod -R g+r conf
 chmod g+x conf
 chown -R tomcat webapps/ work/ temp/ logs/
 echo -e "JAVA_OPTS=\042-Xms256m -Xmx$mem\0155 -XX:MaxPermSize=768m -XX:ReservedCodeCacheSize=225m -XX:MaxDirectMemorySize=2048m\042" > /opt/tomcat/bin/setenv.sh
+jh=$(echo $JAVA_HOME)
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then    
       echo "# Systemd unit file for tomcat" > /etc/systemd/system/tomcat.service
@@ -177,7 +203,7 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
       echo "After=syslog.target network.target" >> /etc/systemd/system/tomcat.service
       echo "[Service]" >> /etc/systemd/system/tomcat.service
       echo "Type=forking" >> /etc/systemd/system/tomcat.service
-      echo "Environment=JAVA_HOME=/opt/java/jre" >> /etc/systemd/system/tomcat.service
+      echo "Environment=JAVA_HOME=$jh" >> /etc/systemd/system/tomcat.service
       echo "Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid" >> /etc/systemd/system/tomcat.service
       echo "Environment=CATALINA_HOME=/opt/tomcat" >> /etc/systemd/system/tomcat.service
       echo "Environment=CATALINA_BASE=/opt/tomcat" >> /etc/systemd/system/tomcat.service
@@ -198,7 +224,7 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
          then
             echo -e "# chkconfig: - 80 20" >> tomcat
       fi
-      echo -e "export JAVA_HOME=/opt/java/jre" >> tomcat
+      echo -e "export JAVA_HOME=\044jh" >> tomcat
       echo -e "export PATH=\044JAVA_HOME/bin:\044PATH" >> tomcat
       echo -e "TOMCAT_HOME=/opt/tomcat" >> tomcat
       echo -e "TOMCAT_USER=tomcat" >> tomcat
@@ -448,6 +474,9 @@ if CheckInstallJava
          then
             echo "Необходимо установить Java выше 1.8"
             exit 1
+         else
+            echo "Find Java_Home"
+            FindJavaHome
       fi   
    else
       NeedJava=true
@@ -460,6 +489,8 @@ if CheckInstallTomcat
          then
             echo "Необходимо установить Tomcat 8"
             exit 1
+         else
+            FindTomcatConfig   
       fi 
    else
       NeedTomcat=true
@@ -523,11 +554,3 @@ if [ "$NeedTomcat" = "true" ]
 fi
 NGBInstall
 exit 0
-
-#For JAVA_HOME
-#jv=$(whereis java | awk '{print $2}')
-#while [ -L $jv ]
-#do
-#   jv=$(ls -la $jv | awk '{print $11}')
-#done
-#echo $jv
