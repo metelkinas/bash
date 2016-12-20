@@ -60,7 +60,6 @@ then
 else
    jh=$(echo $JAVA_HOME)
 fi
-
 }
 CheckInstallTomcat () {
 TomcatProc=false
@@ -168,7 +167,6 @@ case $OSName in
       apt-get install -y wget
    ;;
    CentOS|RHEL)
-      #yum update
       yum install -y wget
    ;;
 esac   
