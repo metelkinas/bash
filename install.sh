@@ -350,7 +350,7 @@ if [ -f catgenome.war ]
       rm -f catgenome.war
 fi      
 wget http://52.38.214.1/distr/$ver/catgenome-$ver.war
-rm catgenome-$ver.war catgenome.war
+mv catgenome-$ver.war catgenome.war
 if [ -d /opt/catgenome/ngb-cli ]
    then
       rm -Rf /opt/catgenome/ngb-cli
@@ -358,7 +358,7 @@ fi
 mkdir -p /opt/catgenome/ngb-cli
 cd /opt/catgenome/ngb-cli
 wget http://52.38.214.1/distr/$ver/ngb-cli-$ver.tar.gz
-rm ngb-cli-$ver.tar.gz ngb-cli.tar.gz
+mv ngb-cli-$ver.tar.gz ngb-cli.tar.gz
 tar -xzf ngb-cli.tar.gz
 rm -f ngb-cli.tar.gz
 echo "export PATH=$PATH:/opt/catgenome/ngb-cli/bin/" >> /etc/profile
