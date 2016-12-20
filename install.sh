@@ -154,6 +154,7 @@ echo "export PATH=\$PATH:\$JAVA_HOME/bin" >> /etc/profile
 source /etc/profile
 }
 TomcatInstall () {
+PathToCatalinaConfig=/opt/tomcat   
 if type -p wget &> /dev/null
 then
    :
@@ -324,8 +325,8 @@ case $OSName in
    ;;
 esac   
 fi   
-echo "CATGENOME_CONF_DIR=/opt/tomcat/conf/catgenome/" >> /opt/tomcat/conf/catalina.properties
-mkdir /opt/tomcat/conf/catgenome/
+echo "CATGENOME_CONF_DIR=/opt/tomcat/conf/catgenome/" >> $PathToCatalinaConfig/catalina.properties
+mkdir -p /opt/tomcat/conf/catgenome/
 echo "files.base.directory.path=/opt/catgenome/contents" > /opt/tomcat/conf/catgenome/catgenome.properties
 echo "database.max.pool.size=25" >> /opt/tomcat/conf/catgenome/catgenome.properties
 echo "database.username=catgenome" >> /opt/tomcat/conf/catgenome/catgenome.properties
@@ -342,7 +343,7 @@ mkdir catgenome
 chown tomcat:tomcat catgenome
 chgrp -R tomcat catgenome
 chmod g+w catgenome
-cd /opt/tomcat/webapps/
+cd $PathToCatalinaConfig/webapps/
 if [ -f catgenome.war ]
    then
       rm -f catgenome.war
@@ -353,7 +354,7 @@ if [ -d /opt/catgenome/ngb-cli ]
    then
       rm -Rf /opt/catgenome/ngb-cli
 fi   
-mkdir /opt/catgenome/ngb-cli
+mkdir -p /opt/catgenome/ngb-cli
 cd /opt/catgenome/ngb-cli
 wget http://52.38.214.1/distr/$ver/ngb-cli-$ver.tar.gz
 rm ngb-cli-$ver.tar.gz ngb-cli.tar.gz
@@ -361,7 +362,7 @@ tar -xzf ngb-cli.tar.gz
 rm -f ngb-cli.tar.gz
 echo "export PATH=$PATH:/opt/catgenome/ngb-cli/bin/" >> /etc/profile
 source /etc/profile
-cd /opt/tomcat/conf
+cd $PathToCatalinaConfig/conf
 sed -i '/Connector port="8080"/,/redirectPort="8443" /c\<Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" compression="on" compressionMinSize="2048" compressableMimeType="text/html,text/xml,application/json" redirectPort="8443"/>' server.xml
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then     
@@ -372,7 +373,7 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
             read item
             case "$item" in
             y|Y) 
-               exec /opt/tomcat/bin/startup.sh
+               exec $PathToCatalinaConfig/bin/startup.sh
             ;;
             n|N) 
                echo "Ввели «n», завершаем..."             
@@ -392,7 +393,7 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
             read item
             case "$item" in
             y|Y) 
-               exec /opt/tomcat/bin/startup.sh
+               exec $PathToCatalinaConfig/bin/startup.sh
             ;;
             n|N) 
                echo "Ввели «n», завершаем..."             
@@ -475,8 +476,12 @@ if CheckInstallJava
             echo "Необходимо установить Java выше 1.8"
             exit 1
          else
-            echo "Find Java_Home"
             FindJavaHome
+            if [ -z "$jh" ]
+               then
+                  echo "Неудалось определить JAVA_HOME."
+                  exit 1
+            fi
       fi   
    else
       NeedJava=true
@@ -490,7 +495,12 @@ if CheckInstallTomcat
             echo "Необходимо установить Tomcat 8"
             exit 1
          else
-            FindTomcatConfig   
+            FindTomcatConfig
+            if [ -z "$PathToCatalinaConfig" ]
+               then
+                  echo "Неудалось определить путь до конфигураци Tomcat"
+                  exit 1
+            fi
       fi 
    else
       NeedTomcat=true
