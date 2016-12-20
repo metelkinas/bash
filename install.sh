@@ -112,7 +112,7 @@ if $TomcatPak
 fi
 }
 FindTomcatConfig () {
-temp=$(ps -ef | grep -m 1 catalina.home)
+temp=$(ps -ef | grep catalina.home | grep -v grep)
 for i in $temp; do 
    if [[ "$i" =~ "-Djava.util.logging.config.file" ]]
    then
@@ -120,7 +120,7 @@ for i in $temp; do
       break
    fi
 done
-PathToCatalinaConfig=$(echo $PathToCatalinaConfig | sed 's/\/logging.properties//')
+PathToCatalinaConfig=$(echo $PathToCatalinaConfig | sed 's/\/conf\/logging.properties//')
 }
 JavaInstall () {
 if type -p wget &> /dev/null
@@ -325,7 +325,7 @@ case $OSName in
    ;;
 esac   
 fi   
-echo "CATGENOME_CONF_DIR=/opt/tomcat/conf/catgenome/" >> $PathToCatalinaConfig/catalina.properties
+echo "CATGENOME_CONF_DIR=/opt/tomcat/conf/catgenome/" >> $PathToCatalinaConfig/conf/catalina.properties
 mkdir -p /opt/tomcat/conf/catgenome/
 echo "files.base.directory.path=/opt/catgenome/contents" > /opt/tomcat/conf/catgenome/catgenome.properties
 echo "database.max.pool.size=25" >> /opt/tomcat/conf/catgenome/catgenome.properties
@@ -362,7 +362,7 @@ tar -xzf ngb-cli.tar.gz
 rm -f ngb-cli.tar.gz
 echo "export PATH=$PATH:/opt/catgenome/ngb-cli/bin/" >> /etc/profile
 source /etc/profile
-cd $PathToCatalinaConfig
+cd $PathToCatalinaConfig/conf
 sed -i '/Connector port="8080"/,/redirectPort="8443" /c\<Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" compression="on" compressionMinSize="2048" compressableMimeType="text/html,text/xml,application/json" redirectPort="8443"/>' server.xml
 if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentOS" ] && [ "$OSVersion" -ge "7" ] || [ "$OSName" = "RHEL" ] && [ "$OSVersion" -ge "7" ]
    then     
