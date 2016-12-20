@@ -53,7 +53,9 @@ then
       jh=$(ls -la $jh | awk '{print $11}')
    done
    jh=$(echo $jh | sed 's/\/bin\/java//')
-   fi
+else
+   jh=$(echo $JAVA_HOME)
+fi
    echo "## Setting JAVA_HOME and PATH for all USERS ##" >> /etc/profile
    echo "export JAVA_HOME=$jh" >> /etc/profile
    echo "export PATH=\$PATH:\$JAVA_HOME/bin" >> /etc/profile
