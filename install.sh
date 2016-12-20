@@ -433,14 +433,14 @@ if IsRoot
    then
    :
 else
-   echo "Для установки скрипт должен быть запущен от root"
+   echo "Error: This script should be ran from root"
    exit 1
 fi
 if GetOSName
    then
       :
    else
-      echo "Ошибка. Неподдерживаемый тип ОС."
+      echo "Error: Operating system is not supported"
       exit 1     
 fi
 GetOSVersion
@@ -449,21 +449,21 @@ case $OSName in
    Ubuntu)
       if [[ "$OSVersion" < "14" ]]
          then
-            echo "Неподдерживамая версия Ubuntu"
+            echo "Error: Ubuntu version is not supported"
             exit 1
       fi
    ;;
    CentOS)
       if [[ "$OSVersion" < "6" ]]
          then
-            echo "Неподдерживамая версия CentOS"
+            echo "Error: Centos version is not supported"
             exit 1
       fi
    ;;
    RHEL)
       if [[ "$OSVersion" < "6" ]]
          then
-            echo "Неподдерживамая версия RHEL"
+            echo "Error: RHEL version is not supported"
             exit 1
       fi
    ;;
@@ -474,7 +474,7 @@ if CheckInstallJava
       GetVersionJava
       if [[ "$JavaVer" < "1.8" ]]
          then
-            echo "Необходимо установить Java выше 1.8"
+            echo "Error: Java 1.8 and higher should be used"
             exit 1
          else
             FindJavaHome
@@ -493,7 +493,7 @@ if CheckInstallTomcat
       GetVersionTomcat
       if [[ "$TomcatVersion" < "8" ]]
          then
-            echo "Необходимо установить Tomcat 8"
+            echo "Error: Tomcat 8 should be installed"
             exit 1
          else
             FindTomcatConfig
@@ -508,7 +508,7 @@ if CheckInstallTomcat
 fi
 if [ "$NeedJava" = "true" ] && [ "$NeedTomcat" = "true" ]
    then
-      echo -n "Tomcat + Java. Продолжить? (y/n) "
+      echo -n "Tomcat and Java will be installed. Continue? (y/n) "
       read item
       case "$item" in
          y|Y) 
@@ -518,17 +518,18 @@ if [ "$NeedJava" = "true" ] && [ "$NeedTomcat" = "true" ]
             NeedTomcat=false                       
          ;;
          n|N) 
-            echo "Ввели «n», завершаем..."
+            echo "«n» is entered, exiting..."
             exit 0
         ;;
          *) 
-            echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+            echo "Nothing is entered. Default action is performed. Exiting"
+            exit 0
         ;;
       esac
 fi
 if [ "$NeedJava" = "true" ]
    then
-      echo -n "Java. Продолжить? (y/n) "
+      echo -n "Java will be installed. Continue? (y/n) "
       read item
       case "$item" in
          y|Y) 
@@ -536,17 +537,17 @@ if [ "$NeedJava" = "true" ]
             NeedJava=false
          ;;
          n|N) 
-            echo "Ввели «n», завершаем..."
+            echo "«n» is entered, exiting..."
             exit 0
          ;;
          *) 
-            echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+            echo "Nothing is entered. Default action is performed. Exiting"
          ;;
       esac
 fi         
 if [ "$NeedTomcat" = "true" ]
    then
-      echo -n "Tomcat. Продолжить? (y/n) "
+      echo -n "Tomcat will be installed. Continue? (y/n)  "
       read item
       case "$item" in
          y|Y) 
@@ -554,11 +555,11 @@ if [ "$NeedTomcat" = "true" ]
             NeedTomcat=false
          ;;
          n|N) 
-            echo "Ввели «n», завершаем..."
+            echo "«n» is entered, exiting..."
             exit 0
          ;;
          *) 
-            echo "Ничего не ввели. Выполняем действие по умолчанию... выходим"
+            echo "Nothing is entered. Default action is performed. Exiting"
             exit 0
          ;;
       esac                                          
