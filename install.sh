@@ -45,7 +45,7 @@ GetVersionJava () {
 JavaVer=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
 }
 FindJavaHome() {
-if [ -n $(echo $JAVA_HOME) ]
+if [ -z $(echo $JAVA_HOME) ]
 then
    jh=$(whereis java | awk '{print $2}')
    while [ -L $jh ]
