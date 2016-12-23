@@ -347,8 +347,13 @@ cd $PathToCatalinaConfig/webapps/
 if [ -f catgenome.war ]
    then
       rm -f catgenome.war
-fi      
-wget http://52.38.214.1/distr/$ver/catgenome-$ver.war
+fi     
+if [ -z "$locpath" ] 
+   then
+      wget http://52.38.214.1/distr/$ver/catgenome-$ver.war   
+   else
+      cp $locpath/catgenome-$ver.war $PathToCatalinaConfig/webapps/catgenome-$ver.war
+fi
 mv catgenome-$ver.war catgenome.war
 if [ -d /opt/catgenome/ngb-cli ]
    then
@@ -356,7 +361,11 @@ if [ -d /opt/catgenome/ngb-cli ]
 fi   
 mkdir -p /opt/catgenome/ngb-cli
 cd /opt/catgenome/ngb-cli
-wget http://52.38.214.1/distr/$ver/ngb-cli-$ver.tar.gz
+if [ -z "$locpath" ] 
+   then
+      wget http://52.38.214.1/distr/$ver/ngb-cli-$ver.tar.gz   
+   else
+      cp $locpath/ngb-cli-$ver.tar.gz /opt/catgenome/ngb-cli/ngb-cli-$ver.tar.gz
 mv ngb-cli-$ver.tar.gz ngb-cli.tar.gz
 tar -xzf ngb-cli.tar.gz
 rm -f ngb-cli.tar.gz
@@ -418,12 +427,15 @@ fi
 
 mem=2048
 ver=latest
-while getopts "m:v:" opt
+locpath=""
+while getopts "m:v:l:" opt
 do
 case $opt in
 m) mem=$OPTARG
 ;;
 v) ver=$OPTARG
+;;
+l) locpath=$OPTARG
 ;;
 *) : ;;
 esac
