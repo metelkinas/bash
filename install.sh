@@ -416,6 +416,29 @@ if [ "$OSName" = "Ubuntu" ] && [ "$OSVersion" -ge "16" ] || [ "$OSName" = "CentO
       fi     
 fi
 }
+GetData () {
+if type -p wget &> /dev/null
+then
+   :
+else
+case $OSName in
+   Ubuntu)
+      apt-get update 
+      apt-get install -y wget
+   ;;
+   CentOS|RHEL)
+      yum install -y wget
+   ;;
+esac   
+fi 
+mkdir -p /opt/catgenome/data
+cd /opt/catgenome/data
+wget ftp://ftp.ensembl.org/pub/release-86/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa.gz
+ngb reg_ref /opt/catgenome/data/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa.gz -n GRCh38_sequence
+wget ftp://ftp.ensembl.org/pub/release-86/gtf/homo_sapiens/Homo_sapiens.GRCh38.86.gtf.gz
+ngb reg_file /opt/catgenome/data/Homo_sapiens.GRCh38.86.gtf.gz -n GRCh38_genes
+ngb add_genes GRCh38_sequence GRCh38_genes
+}
 IsRoot () {
 if [ "$(id -u)" = "0" ]; 
    then
@@ -576,4 +599,19 @@ if [ "$NeedTomcat" = "true" ]
       esac                                          
 fi
 NGBInstall
+echo -n "Tomcat will be installed. Continue? (y/n)  "
+read item
+case "$item" in
+   y|Y) 
+      GetData
+   ;;
+   n|N) 
+      echo "«n» is entered, exiting..."
+      exit 0
+   ;;
+   *) 
+      echo "Nothing is entered. Default action is performed. Exiting"
+      exit 0
+   ;;
+esac
 exit 0
