@@ -600,7 +600,7 @@ if [ "$NeedTomcat" = "true" ]
       esac                                          
 fi
 NGBInstall
-echo -n "Tomcat will be installed. Continue? (y/n)  "
+echo -n "Genome data installed. Continue? (y/n)  "
 read item
 case "$item" in
    y|Y) 
