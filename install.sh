@@ -366,6 +366,7 @@ if [ -z "$locpath" ]
       wget http://52.38.214.1/distr/$ver/ngb-cli-$ver.tar.gz   
    else
       cp $locpath/ngb-cli-$ver.tar.gz /opt/catgenome/ngb-cli/ngb-cli-$ver.tar.gz
+fi      
 mv ngb-cli-$ver.tar.gz ngb-cli.tar.gz
 tar -xzf ngb-cli.tar.gz
 rm -f ngb-cli.tar.gz
